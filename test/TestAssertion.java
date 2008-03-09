@@ -1,15 +1,15 @@
+import static java.lang.System.out;
 
 public class TestAssertion {
 
 	public static void main(String[] args) {
-		assert (1 == 1) : "this should never happen!"; 
-	}
-	
-	private void bar() {
-		if (true) 
-			assert true;
-		else
+		try {
 			assert false;
+			out.println("Oops, assertions not checked!");
+		}
+		catch (AssertionError expected) {
+			out.println("Okay! fa works fine.");
+		}
 	}
 	
 }

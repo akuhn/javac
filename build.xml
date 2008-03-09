@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<project default="compress" basedir=".">
+<project default="deploy" basedir=".">
 
-    <target name="compress" description="Compression target">
+    <target name="deploy" description="Compression target">
         <jar id="files" jarfile="fa.jar">
     		<fileset dir="bin" includes="**/ForceAssertions*.class"/>
     		<fileset dir="src" includes="**/ForceAssertions.java"/>
@@ -13,5 +13,22 @@
     	</pathconvert>	
     	<echo message="${listing}"/>
     </target>
+	
+	<target name="build-test" depends="deploy">
+		<javac destdir="test" srcdir="test" source="1.6" target="1.6">
+			<classpath>
+				<pathelement location="fa.jar"/>
+			</classpath>
+			<include name="**/*.java"/>
+		 </javac>
+	</target>
+	
+	<target name="run-test" depends="build-test">
+		<java classname="TestAssertion" classpath="test">
+			<classpath>
+				<!-- fa.jar is only required when compiling -->
+			</classpath>
+		</java>	
+	</target>	
 
 </project>

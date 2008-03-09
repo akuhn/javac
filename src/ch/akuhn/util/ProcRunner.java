@@ -59,7 +59,7 @@ public class ProcRunner implements Runnable {
 		CompilationTask task = compiler.getTask(null, // out
 				fileman, // fileManager
 				null, // diagnosticsListener
-				List.of("-proc:only"), // options
+				List.of("-printsource"), // options
 				null, // classes
 				units);
 
