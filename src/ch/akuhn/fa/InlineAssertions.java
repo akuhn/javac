@@ -16,7 +16,7 @@
 //  along with "fa". If not, see <http://www.gnu.org/licenses/>.
 //  
 
-package ch.akuhn.analysis;
+package ch.akuhn.fa;
 
 import java.util.Set;
 
@@ -112,7 +112,7 @@ public class InlineAssertions extends AbstractProcessor {
 	}
 
 	public static void main(String[] args) {
-		Runnable runner = new ProcRunner(new InlineAssertions());
+		Runnable runner = new ProcRunner(new ForceAssertions());
 		runner.run();
 	}
 

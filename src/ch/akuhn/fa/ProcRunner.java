@@ -16,7 +16,7 @@
 //  along with "fa". If not, see <http://www.gnu.org/licenses/>.
 //  
 
-package ch.akuhn.analysis;
+package ch.akuhn.fa;
 
 import java.io.File;
 
