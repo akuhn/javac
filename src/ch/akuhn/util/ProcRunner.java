@@ -16,7 +16,7 @@
 //  along with "fa". If not, see <http://www.gnu.org/licenses/>.
 //  
 
-package ch.akuhn.fa;
+package ch.akuhn.util;
 
 import java.io.File;
 
@@ -26,6 +26,9 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import javax.tools.JavaCompiler.CompilationTask;
+
+
+import ch.akuhn.fa.ForceAssertions;
 
 import com.sun.tools.javac.util.List;
 
@@ -64,6 +67,11 @@ public class ProcRunner implements Runnable {
 
 		task.call();
 
+	}
+
+	public static void main(String[] args) {
+		Runnable runner = new ProcRunner(new ForceAssertions());
+		runner.run();
 	}
 
 

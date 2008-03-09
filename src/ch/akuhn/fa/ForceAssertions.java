@@ -32,6 +32,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 
+import ch.akuhn.util.ProcRunner;
+
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
@@ -109,11 +111,6 @@ public class ForceAssertions extends AbstractProcessor {
 		else processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
 				tally + " assertions inlined.");
 		return false;
-	}
-
-	public static void main(String[] args) {
-		Runnable runner = new ProcRunner(new ForceAssertions());
-		runner.run();
 	}
 
 }

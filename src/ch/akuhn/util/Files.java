@@ -17,7 +17,7 @@
 //  <http://www.gnu.org/licenses/>.
 //  
 
-package ch.akuhn.fa;
+package ch.akuhn.util;
 
 import java.io.Closeable;
 import java.io.File;
