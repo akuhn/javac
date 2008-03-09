@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<project default="compress" basedir=".">
+
+    <target name="compress" description="Compression target">
+        <jar id="files" jarfile="fa.jar">
+    		<fileset dir="bin" includes="**/InlineAssertions*.class"/>
+    		<fileset dir="src" includes="**/InlineAssertions.java"/>
+    		<fileset dir="src" includes="META-INF/**/*"/>
+        </jar>
+    	<zipfileset id="files" src="fa.jar"/>
+    	<pathconvert property="listing" refid="files" pathsep="${line.separator}">
+    		<globmapper from="${basedir}${file.separator}*" to="*"/>
+    	</pathconvert>	
+    	<echo message="${listing}"/>
+    </target>
+
+</project>
