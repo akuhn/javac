@@ -45,7 +45,7 @@ import com.sun.tools.javac.util.List;
 
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class InlineAssertions extends AbstractProcessor {
+public class ForceAssertions extends AbstractProcessor {
 
 	private int tally = 0;
 	

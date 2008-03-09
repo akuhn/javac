@@ -36,7 +36,7 @@ public class ProcRunner implements Runnable {
 
 
 	private Iterable<File> getFiles() {
-		return Files.all("../Fame/src", "*.java");
+		return Files.all("test", "*.java");
 	}
 
 	public ProcRunner(Processor processor) {
