@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<project default="run-example" basedir=".">
+
+  <target name="clean">
+    <mkdir dir="out"/> 	
+    <delete>
+        <fileset dir="out" includes="**/*"/>
+        <fileset dir="bin" includes="**/*"/>
+    </delete>       
+    <delete file="roman.jar"/>
+  </target>       
+        
+  <target name="compile-roman">
+    <javac destdir="bin" srcdir="src" source="1.6" target="1.6">
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+  
+  <target name="package-roman" depends="compile-roman">
+    <jar jarfile="roman.jar">
+      <fileset dir="bin" includes="numeral/**/*.class"/>
+      <fileset dir="src" includes="numeral/**/*.java"/>
+      <fileset dir="src" includes="**/javax.*"/>
+    </jar>
+  </target>	
+
+  <target name="printsource" depends="package-roman">
+    <javac destdir="out" srcdir="test" source="1.6" target="1.6">
+      <classpath>
+        <pathelement location="roman.jar"/>
+      </classpath>
+      <compilerarg line="-printsource"/> 	
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+	
+  <target name="compile-example" depends="package-roman">
+    <javac destdir="out" srcdir="test" source="1.6" target="1.6">
+      <classpath>
+        <pathelement location="roman.jar"/>
+      </classpath>
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+	
+  <target name="run-example" depends="printsource,compile-example">
+    <java classpath="out" classname="Example"/>
+  </target>       
+        
+</project>
