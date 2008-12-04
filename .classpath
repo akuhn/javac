@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="META_INF/" kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Program Files/Java/jdk1.6.0_03/lib/tools.jar" sourcepath="C:/Documents and Settings/akuhn/My Documents/workspace/Javac/langtools/src/share/classes"/>
 	<classpathentry kind="output" path="bin"/>
