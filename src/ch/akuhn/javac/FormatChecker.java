@@ -12,7 +12,7 @@ import javax.lang.model.type.TypeMirror;
 
 import ch.akuhn.javac.Printf.PrintfVisitor;
 
-public final class FormatChecker {
+public class FormatChecker {
 
     private final PrintfVisitor printf;
 
@@ -20,69 +20,70 @@ public final class FormatChecker {
         this.printf = printf;
     }
 
-    public FormatChecker verify(String format, TypeMirror ... args) {
-	int last = -1;
-	int lasto = -1;
-
-	List<FormatString2> list = formatterParse(format);
-	
-	for (FormatString2 fs: list) {
-	    int index = fs.index();
-	        switch (index) {
-	        case -2:  // fixed string, "%n", or "%%"
-	            //fs.__verify__(null);
-	            break;
-	        case -1:  // relative index
-	            if (last < 0 || (args != null && last > args.length - 1))
-	                throw new MissingFormatArgumentException(fs.toString());
-	            if (!fs.verify((args == null ? null : args[last]))) throw new Error();
-	            break;
-	        case 0:  // ordinary index
-	            lasto++;
-	            last = lasto;
-	            if (args != null && lasto > args.length - 1)
-	                throw new MissingFormatArgumentException(fs.toString());
-	            if (!fs.verify((args == null ? null : args[lasto]))) throw new Error();
-	            break;
-	        default:  // explicit index
-	            last = index - 1;
-	        if (args != null && last > args.length - 1)
-	            throw new MissingFormatArgumentException(fs.toString());
-	        if(!fs.verify((args == null ? null : args[last]))) throw new Error();
-	        break;
-	        }
-	}
-	return this;
+    public FormatChecker verify(String format, TypeMirror... args) {
+        int last = -1;
+        int lasto = -1;
+        List<FormatStringWrapper> list = formatterParse(format);
+        for (FormatStringWrapper fs: list) {
+            int index = fs.index();
+            switch (index) {
+            case -2: // fixed string, "%n", or "%%"
+                break;
+            case -1: // relative index
+                if (last < 0 || (args != null && last > args.length - 1)) {
+                    throw new MissingFormatArgumentException(fs.toString());
+                }
+                fs.verify((args == null ? null : args[last]));
+                break;
+            case 0: // ordinary index
+                lasto++;
+                last = lasto;
+                if (args != null && lasto > args.length - 1) {
+                    throw new MissingFormatArgumentException(fs.toString());
+                }
+                fs.verify((args == null ? null : args[lasto]));
+                break;
+            default: // explicit index
+                last = index - 1;
+                if (args != null && last > args.length - 1) {
+                    throw new MissingFormatArgumentException(fs.toString());
+                }
+                fs.verify((args == null ? null : args[last]));
+                break;
+            }
+        }
+        return this;
     }
 
-    private List<FormatString2> formatterParse(String format) {
-        Object[] array = AllYourPrivateAreBelongToUs
-                .<Object[]>invokeMethod(new Formatter(), "parse", String.class, format);
-        List<FormatString2> list = new ArrayList<FormatString2>();
-        for (Object each: array) list.add(new FormatString2(each));
+    private List<FormatStringWrapper> formatterParse(String format) {
+        Object[] array = AllYourPrivateAreBelongToUs.<Object[]>invokeMethod(new Formatter(), "parse", String.class,
+                format);
+        List<FormatStringWrapper> list = new ArrayList<FormatStringWrapper>();
+        for (Object each: array)
+            list.add(new FormatStringWrapper(each));
         return list;
     }
 
-    public class FormatString2 {
-        
+    public class FormatStringWrapper {
+
         private Object formatString;
-        
-        public FormatString2(Object formatString) {
+
+        public FormatStringWrapper(Object formatString) {
             this.formatString = formatString;
         }
-        
+
         @Override
         public String toString() {
             return formatString.toString();
         }
-        
+
         public int index() {
             return AllYourPrivateAreBelongToUs.<Integer>invokeMethod(formatString, "index");
         }
-        
-        public boolean verify(TypeMirror arg) {
+
+        public Void verify(TypeMirror arg) {
             if (dt()) return verifyDateTime(arg);
-            switch(c()) {
+            switch (c()) {
             case Conversion.DECIMAL_INTEGER:
             case Conversion.OCTAL_INTEGER:
             case Conversion.HEXADECIMAL_INTEGER:
@@ -102,9 +103,9 @@ public final class FormatChecker {
             case Conversion.HASHCODE:
                 return verifyHashCode(arg);
             case Conversion.LINE_SEPARATOR:
-                return true;
+                return null;
             case Conversion.PERCENT_SIGN:
-                return true;
+                return null;
             default:
                 throw new AssertionError();
             }
@@ -118,117 +119,115 @@ public final class FormatChecker {
             return AllYourPrivateAreBelongToUs.<Boolean>getField(formatString, "dt");
         }
 
-        private boolean verifyInteger(TypeMirror arg) {
-            if (printf.isAssignable(arg, Byte.class))
-                return true;
-            else if (printf.isAssignable(arg, Short.class))
-                return true;
-            else if (printf.isAssignable(arg, Integer.class))
-                return true;
-            else if (printf.isAssignable(arg, Long.class))
-                return true;
-            else if (printf.isAssignable(arg, BigInteger.class))
-                return true;
-            else
-                return failConversion(c(), arg);
+        private Void verifyInteger(TypeMirror arg) {
+            if (printf.isAssignable(arg, Byte.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, Short.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, Integer.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, Long.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, BigInteger.class)) {
+                return null;
+            } else return failConversion(c(), arg);
         }
 
-        private boolean verifyFloat(TypeMirror arg) {
-            if (printf.isAssignable(arg, Float.class))
-                return true;
-            else if (printf.isAssignable(arg, Double.class))
-                return true;
-            else if (printf.isAssignable(arg, BigInteger.class))
-                return true;
-            else
-                return failConversion(c(), arg);
+        private Void verifyFloat(TypeMirror arg) {
+            if (printf.isAssignable(arg, Float.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, Double.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, BigInteger.class)) {
+                return null;
+            } else return failConversion(c(), arg);
         }
 
-        private boolean verifyDateTime(TypeMirror arg) {
+        private Void verifyDateTime(TypeMirror arg) {
             if (printf.isAssignable(arg, Long.class)) {
-                return true;
+                return null;
             } else if (printf.isAssignable(arg, Date.class)) {
-                return true;
+                return null;
             } else if (printf.isAssignable(arg, Calendar.class)) {
-                return true;
+                return null;
             } else {
                 return failConversion(c(), arg);
             }
         }
 
-        private boolean verifyCharacter(TypeMirror arg) {
-            if (printf.isAssignable(arg, Character.class))
-                return true;
-            else if (printf.isAssignable(arg, Byte.class))
-                return true;
-            else if (printf.isAssignable(arg, Short.class))
-                return true;
-            else if (printf.isAssignable(arg, Integer.class))
-                return true;
-            else {
+        private Void verifyCharacter(TypeMirror arg) {
+            if (printf.isAssignable(arg, Character.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, Byte.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, Short.class)) {
+                return null;
+            } else if (printf.isAssignable(arg, Integer.class)) {
+                return null;
+            } else {
                 return failConversion(c(), arg);
             }
         }
 
-        private boolean verifyString(TypeMirror arg) {
-            return true;
+        private Void verifyString(TypeMirror arg) {
+            return null;
         }
 
-        private boolean verifyBoolean(TypeMirror arg) {
-            return true;
+        private Void verifyBoolean(TypeMirror arg) {
+            return null;
         }
 
-        private boolean verifyHashCode(TypeMirror arg) {
-            return true;
+        private Void verifyHashCode(TypeMirror arg) {
+            return null;
         }
 
-        private boolean failConversion(char c, Object arg) {
-            return false;
+        private Void failConversion(char c, TypeMirror arg) {
+            throw new IllegalFormatConversionException(c, arg);
         }
 
     }
-    
+
     private static class Conversion {
         // Byte, Short, Integer, Long, BigInteger
         // (and associated primitives due to autoboxing)
-	static final char DECIMAL_INTEGER     = 'd';
-	static final char OCTAL_INTEGER       = 'o';
-	static final char HEXADECIMAL_INTEGER = 'x';
-	static final char HEXADECIMAL_INTEGER_UPPER = 'X';
+        static final char DECIMAL_INTEGER = 'd';
+        static final char OCTAL_INTEGER = 'o';
+        static final char HEXADECIMAL_INTEGER = 'x';
+        static final char HEXADECIMAL_INTEGER_UPPER = 'X';
 
         // Float, Double, BigDecimal
         // (and associated primitives due to autoboxing)
-	static final char SCIENTIFIC          = 'e';
-	static final char SCIENTIFIC_UPPER    = 'E';
-	static final char GENERAL             = 'g';
-	static final char GENERAL_UPPER       = 'G';
-	static final char DECIMAL_FLOAT       = 'f';
-	static final char HEXADECIMAL_FLOAT   = 'a';
-	static final char HEXADECIMAL_FLOAT_UPPER = 'A';
+        static final char SCIENTIFIC = 'e';
+        static final char SCIENTIFIC_UPPER = 'E';
+        static final char GENERAL = 'g';
+        static final char GENERAL_UPPER = 'G';
+        static final char DECIMAL_FLOAT = 'f';
+        static final char HEXADECIMAL_FLOAT = 'a';
+        static final char HEXADECIMAL_FLOAT_UPPER = 'A';
 
         // Character, Byte, Short, Integer
         // (and associated primitives due to autoboxing)
-	static final char CHARACTER           = 'c';
-	static final char CHARACTER_UPPER     = 'C';
+        static final char CHARACTER = 'c';
+        static final char CHARACTER_UPPER = 'C';
 
         // java.util.Date, java.util.Calendar, long
-	static final char DATE_TIME           = 't';
-	static final char DATE_TIME_UPPER     = 'T';
+        static final char DATE_TIME = 't';
+        static final char DATE_TIME_UPPER = 'T';
 
         // if (arg.TYPE != boolean) return boolean
         // if (arg != null) return true; else return false;
-	static final char BOOLEAN             = 'b';
-	static final char BOOLEAN_UPPER       = 'B';
+        static final char BOOLEAN = 'b';
+        static final char BOOLEAN_UPPER = 'B';
         // if (arg instanceof Formattable) arg.formatTo()
         // else arg.toString();
-	static final char STRING              = 's';
-	static final char STRING_UPPER        = 'S';
+        static final char STRING = 's';
+        static final char STRING_UPPER = 'S';
         // arg.hashCode()
-	static final char HASHCODE            = 'h';
-	static final char HASHCODE_UPPER      = 'H';
+        static final char HASHCODE = 'h';
+        static final char HASHCODE_UPPER = 'H';
 
-	static final char LINE_SEPARATOR      = 'n';
-	static final char PERCENT_SIGN        = '%';
+        static final char LINE_SEPARATOR = 'n';
+        static final char PERCENT_SIGN = '%';
 
     }
 

@@ -1,7 +1,10 @@
 package ch.akuhn.javac;
 
 import java.util.ArrayList;
+import java.util.IllegalFormatException;
+import java.util.MissingFormatArgumentException;
 import java.util.Set;
+import java.util.UnknownFormatConversionException;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -15,6 +18,7 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 import com.sun.source.tree.MethodInvocationTree;
@@ -25,19 +29,21 @@ import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
-import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
+import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCMethodInvocation;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.Log;
 
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class Printf extends AbstractProcessor {
 
-    private class Visitor extends TreeScanner<Void,Void> {
+    public class PrintfVisitor extends TreeScanner<Void,Void> {
 
         private Name printf = elements.getName("printf");
+        private Name format = elements.getName("format");
         
         @Override
         public Void visitMethodInvocation(MethodInvocationTree tree0, Void unused) {
@@ -46,9 +52,20 @@ public class Printf extends AbstractProcessor {
             return super.visitMethodInvocation(tree, unused);
         }
 
+        public boolean isAssignable(TypeMirror type0, Class<?> jClass) {
+            TypeMirror type = elements.getTypeElement(jClass.getName()).asType();
+            if (!types.isAssignable(type0, type)) return false;
+            return true;
+        }
+        
         private void verifyPrintf(JCMethodInvocation tree) {
             String format = (String) tree.args.head.type.constValue();
-            new FormatChecker().__verify__(format, types(tree.args.tail));
+            try {
+                new FormatChecker(this).verify(format, types(tree.args.tail));
+            } 
+            catch (IllegalFormatException ex) {
+                log.rawWarning(tree.pos, ex.toString());
+            }
         }
 
         private TypeMirror[] types(List<JCExpression> tail) {
@@ -58,7 +75,8 @@ public class Printf extends AbstractProcessor {
         }
 
         private boolean isPrintf(JCMethodInvocation tree) {
-            return TreeInfo.name(tree.meth) == printf 
+            Name name = TreeInfo.name(tree.meth);
+            return (name == printf || name == format)
                     && tree.args.size() > 1
                     && tree.args.head.type.constValue() instanceof String;
         }
@@ -68,13 +86,16 @@ public class Printf extends AbstractProcessor {
     private Trees trees;
     private Attr attr;
     private Elements elements;
+    private Types types;
+    private Log log;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
-        // XXX get current instance of `Attr` and store for later use
         attr = Attr.instance(((JavacProcessingEnvironment) processingEnv).getContext());
+        log = Log.instance(((JavacProcessingEnvironment) processingEnv).getContext());
         trees = Trees.instance(processingEnv);
         elements = processingEnv.getElementUtils();
+        types = processingEnv.getTypeUtils();
         super.init(processingEnv);
     }
 
@@ -84,21 +105,25 @@ public class Printf extends AbstractProcessor {
             Set<? extends Element> elements = roundEnv.getRootElements();
             for (Element each: elements) {
                 if (each.getKind() == ElementKind.CLASS) {
-                    // XXX attribute the class with type information
+                    setCurrentSource(each);
                     attr.attribClass(null, (ClassSymbol) each);
                     Tree tree = trees.getTree(each);
                     verify(tree);
                 }
             }
         } else {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "done.");
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Printf done.");
         }
         return false;
     }
 
-    private void verify(Tree tree) {
-        TreeVisitor<Void,Void> visitor = new Visitor();
-        tree.accept(visitor, null);
+    private void setCurrentSource(Element each) {
+        log.useSource(((JCCompilationUnit) trees.getPath(each).getCompilationUnit()).sourcefile);
     }
 
+    private void verify(Tree tree) {
+        TreeVisitor<Void,Void> visitor = new PrintfVisitor();
+        tree.accept(visitor, null);
+    }
+    
 }
