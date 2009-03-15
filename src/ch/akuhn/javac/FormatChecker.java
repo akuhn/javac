@@ -12,6 +12,24 @@ import javax.lang.model.type.TypeMirror;
 
 import ch.akuhn.javac.Printf.PrintfVisitor;
 
+/**
+ * Checks the format of format strings.
+ * <p>
+ * Reuses as much of java.util.Formatter as possible.
+ * The private method Formatter#parse(String) is called using reflection,
+ * and the returned FormatString instances are wrapped into FormatStringWrapper
+ * instances that use reflection to access private members of FormatString.
+ * This class's method #verify(String,TypeMirror...) is copypasta of Formatter#format(String,Object...),
+ * in the same way the #verify* methods of the FormatStringWrapper are copypasta of the #print* methods
+ * of Formatter's FormatSpecifier. All printing has been removed and instanceof checks been replaces with
+ * assignability checks using type mirrors. 
+ * 
+ * @see Formatter
+ * @see Printf
+ * 
+ * @author Adrian Kuhn, Mar 16, 2009
+ *
+ */
 public class FormatChecker {
 
     private final PrintfVisitor printf;
@@ -20,7 +38,7 @@ public class FormatChecker {
         this.printf = printf;
     }
 
-    public FormatChecker verify(String format, TypeMirror... args) {
+    public void verify(String format, TypeMirror... args) {
         int last = -1;
         int lasto = -1;
         List<FormatStringWrapper> list = formatterParse(format);
@@ -52,7 +70,6 @@ public class FormatChecker {
                 break;
             }
         }
-        return this;
     }
 
     private List<FormatStringWrapper> formatterParse(String format) {

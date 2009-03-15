@@ -2,6 +2,14 @@ package ch.akuhn.javac;
 
 import javax.lang.model.type.TypeMirror;
 
+/**
+ * Specialized IllegalFormatConversionException that acepts TypeMirrors instead of Classes.
+ * 
+ * @see FormatChecker
+ * @see java.util.IllegalFormatConversionException
+ * 
+ * @author Adrian Kuhn, Mar 16, 2009
+ */
 @SuppressWarnings("serial")
 public class IllegalFormatConversionException extends java.util.IllegalFormatConversionException {
 

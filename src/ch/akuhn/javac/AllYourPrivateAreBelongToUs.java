@@ -4,6 +4,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Provides access to private members.
+ * 
+ * @author Adrian Kuhn, Mar 16, 2009
+ */
 public class AllYourPrivateAreBelongToUs {
 
     @SuppressWarnings("unchecked")
