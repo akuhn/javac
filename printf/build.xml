@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<project default="example" basedir=".">
+
+  <property name="jar.file" value="printf.jar"/>
+	
+  <target name="clean">
+    <delete>
+        <fileset dir="bin" includes="**/*"/>
+    </delete>       
+    <delete file="${jar.file}"/>
+  </target>       
+        
+  <target name="compile">
+    <javac destdir="bin" srcdir="src" source="1.6" target="1.6">
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+  
+  <target name="package" depends="compile">
+    <jar jarfile="${jar.file}">
+      <fileset dir="bin" includes="**/*.class"/>
+      <fileset dir="src" includes="**/*.java"/>
+      <fileset dir="src" includes="META-INF/services/*"/>
+    </jar>
+  </target>	
+
+  <target name="example" depends="package">
+    <javac destdir="." srcdir="example" source="1.6" target="1.6">
+      <classpath>
+        <pathelement location="${jar.file}"/>
+      </classpath>
+      <compilerarg line="-proc:only"/>
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+        
+</project>
